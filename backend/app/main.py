@@ -5,7 +5,7 @@
 """
 from __future__ import annotations
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
@@ -36,3 +36,12 @@ def health() -> dict[str, object]:
 def overview() -> dict[str, object]:
     """运营概览：把各业务模块的待处理量汇总成看板卡片。"""
     return store.overview()
+
+
+@app.get("/api/overview/drilldown")
+def overview_drilldown(module: str = Query(description="业务模块标识，如 station")) -> dict[str, object]:
+    """概览下钻：某个模块待处理条目按状态、负责班组的分布和近七天趋势。"""
+    payload = store.module_drilldown(module)
+    if payload is None:
+        raise HTTPException(status_code=404, detail=f"业务模块 {module} 不存在")
+    return payload
