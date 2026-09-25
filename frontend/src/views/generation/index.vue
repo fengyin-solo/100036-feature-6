@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { request } from '@/api/client'
 
@@ -73,7 +73,16 @@ const ENDPOINT = '/api/generation'
 const columns = ["记录编号", "电站名称", "统计日期", "理论发电量", "实际发电量", "等效利用小时", "弃光电量", "记录状态"]
 const actions = ["提交核算", "复核确认", "标记争议"]
 const statuses = ["待核算", "已核算", "已复核", "有争议"]
-const stats = [{"label": "本月发电量", "value": 0}, {"label": "等效小时均值", "value": 0}, {"label": "弃光电量合计", "value": 0}]
+const stats = computed(() => [
+  { label: "本月发电量", value: 0 },
+  { label: "等效小时均值", value: 0 },
+  { label: "弃光电量合计", value: 0 },
+])
+
+function statusCount(status: string) {
+  // 与列表同一批条目：概览/下钻按 pending 统计，这里按模块自己的状态口径统计
+  return rows.value.filter((row) => String(row.status ?? '') === status).length
+}
 
 const rows = ref<Row[]>([])
 const total = ref(0)

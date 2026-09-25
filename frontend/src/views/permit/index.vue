@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { request } from '@/api/client'
 
@@ -73,7 +73,16 @@ const ENDPOINT = '/api/permit'
 const columns = ["许可编号", "作业类型", "作业地点", "工作负责人", "安全措施", "许可时间", "有效期至", "许可状态"]
 const actions = ["提交申请", "签发许可", "驳回申请"]
 const statuses = ["待申请", "已受理", "已许可", "已驳回", "已过期"]
-const stats = [{"label": "待受理许可", "value": 0}, {"label": "有效许可", "value": 0}, {"label": "即将到期许可", "value": 0}]
+const stats = computed(() => [
+  { label: "待受理许可", value: statusCount(statuses[1]) },
+  { label: "有效许可", value: 0 },
+  { label: "即将到期许可", value: 0 },
+])
+
+function statusCount(status: string) {
+  // 与列表同一批条目：概览/下钻按 pending 统计，这里按模块自己的状态口径统计
+  return rows.value.filter((row) => String(row.status ?? '') === status).length
+}
 
 const rows = ref<Row[]>([])
 const total = ref(0)

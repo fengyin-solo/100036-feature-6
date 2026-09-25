@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { request } from '@/api/client'
 
@@ -73,7 +73,16 @@ const ENDPOINT = '/api/array'
 const columns = ["方阵编号", "方阵名称", "组件型号", "组件数量", "安装倾角", "朝向方位", "所属电站", "方阵状态"]
 const actions = ["提交验收", "登记遮挡", "拆除方阵"]
 const statuses = ["待验收", "已投运", "遮挡异常", "已拆除"]
-const stats = [{"label": "在运方阵", "value": 0}, {"label": "遮挡异常方阵", "value": 0}, {"label": "组件总块数", "value": 0}]
+const stats = computed(() => [
+  { label: "在运方阵", value: statusCount(statuses[1]) },
+  { label: "遮挡异常方阵", value: statusCount(statuses[2]) },
+  { label: "组件总块数", value: 0 },
+])
+
+function statusCount(status: string) {
+  // 与列表同一批条目：概览/下钻按 pending 统计，这里按模块自己的状态口径统计
+  return rows.value.filter((row) => String(row.status ?? '') === status).length
+}
 
 const rows = ref<Row[]>([])
 const total = ref(0)

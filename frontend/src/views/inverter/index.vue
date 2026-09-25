@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { request } from '@/api/client'
 
@@ -73,7 +73,16 @@ const ENDPOINT = '/api/inverter'
 const columns = ["设备编号", "设备型号", "额定功率", "转换效率", "所属方阵", "通讯地址", "投运日期", "运行状态"]
 const actions = ["完成调试", "登记故障", "退役设备"]
 const statuses = ["待调试", "运行中", "故障停机", "已退役"]
-const stats = [{"label": "在运逆变器", "value": 0}, {"label": "故障停机", "value": 0}, {"label": "平均转换效率", "value": 0}]
+const stats = computed(() => [
+  { label: "在运逆变器", value: statusCount(statuses[1]) },
+  { label: "故障停机", value: statusCount(statuses[2]) },
+  { label: "平均转换效率", value: 0 },
+])
+
+function statusCount(status: string) {
+  // 与列表同一批条目：概览/下钻按 pending 统计，这里按模块自己的状态口径统计
+  return rows.value.filter((row) => String(row.status ?? '') === status).length
+}
 
 const rows = ref<Row[]>([])
 const total = ref(0)

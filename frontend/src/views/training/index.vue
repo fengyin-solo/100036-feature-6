@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { request } from '@/api/client'
 
@@ -73,7 +73,16 @@ const ENDPOINT = '/api/training'
 const columns = ["培训编号", "培训主题", "培训对象", "培训方式", "计划课时", "考核成绩", "培训日期", "培训状态"]
 const actions = ["确认开班", "登记结业", "取消培训"]
 const statuses = ["待开班", "培训中", "已结业", "已取消"]
-const stats = [{"label": "待开班培训", "value": 0}, {"label": "培训中课程", "value": 0}, {"label": "平均考核成绩", "value": 0}]
+const stats = computed(() => [
+  { label: "待开班培训", value: statusCount(statuses[0]) },
+  { label: "培训中课程", value: statusCount(statuses[1]) },
+  { label: "平均考核成绩", value: 0 },
+])
+
+function statusCount(status: string) {
+  // 与列表同一批条目：概览/下钻按 pending 统计，这里按模块自己的状态口径统计
+  return rows.value.filter((row) => String(row.status ?? '') === status).length
+}
 
 const rows = ref<Row[]>([])
 const total = ref(0)

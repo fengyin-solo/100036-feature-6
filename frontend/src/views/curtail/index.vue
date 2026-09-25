@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { request } from '@/api/client'
 
@@ -73,7 +73,16 @@ const ENDPOINT = '/api/curtail'
 const columns = ["事件编号", "所属电站", "限电原因", "限电开始时间", "限电结束时间", "损失电量", "调度指令号", "限电状态"]
 const actions = ["确认限电", "确认恢复", "提交申诉"]
 const statuses = ["待确认", "已确认", "已恢复", "已申诉"]
-const stats = [{"label": "今日限电次数", "value": 0}, {"label": "损失电量合计", "value": 0}, {"label": "待申诉事件", "value": 0}]
+const stats = computed(() => [
+  { label: "今日限电次数", value: 0 },
+  { label: "损失电量合计", value: 0 },
+  { label: "待申诉事件", value: statusCount(statuses[3]) },
+])
+
+function statusCount(status: string) {
+  // 与列表同一批条目：概览/下钻按 pending 统计，这里按模块自己的状态口径统计
+  return rows.value.filter((row) => String(row.status ?? '') === status).length
+}
 
 const rows = ref<Row[]>([])
 const total = ref(0)

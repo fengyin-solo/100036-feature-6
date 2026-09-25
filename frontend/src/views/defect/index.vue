@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { request } from '@/api/client'
 
@@ -73,7 +73,16 @@ const ENDPOINT = '/api/defect'
 const columns = ["缺陷编号", "所属设备", "缺陷类型", "严重等级", "发现时间", "发现人", "处理期限", "缺陷状态"]
 const actions = ["确认定级", "提交闭环", "挂起缺陷"]
 const statuses = ["待定级", "已定级", "处理中", "已闭环", "已挂起"]
-const stats = [{"label": "待定级缺陷", "value": 0}, {"label": "处理中缺陷", "value": 0}, {"label": "超期未闭环", "value": 0}]
+const stats = computed(() => [
+  { label: "待定级缺陷", value: statusCount(statuses[0]) },
+  { label: "处理中缺陷", value: statusCount(statuses[2]) },
+  { label: "超期未闭环", value: 0 },
+])
+
+function statusCount(status: string) {
+  // 与列表同一批条目：概览/下钻按 pending 统计，这里按模块自己的状态口径统计
+  return rows.value.filter((row) => String(row.status ?? '') === status).length
+}
 
 const rows = ref<Row[]>([])
 const total = ref(0)

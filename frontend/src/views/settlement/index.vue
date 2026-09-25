@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { request } from '@/api/client'
 
@@ -73,7 +73,16 @@ const ENDPOINT = '/api/settlement'
 const columns = ["结算单号", "结算对象", "结算周期", "上网电量", "电价标准", "应结金额", "已付金额", "结算状态"]
 const actions = ["发起核对", "确认结算", "标记争议"]
 const statuses = ["待核对", "核对中", "已确认", "已付清", "有争议"]
-const stats = [{"label": "待核对结算单", "value": 0}, {"label": "本月结算额", "value": 0}, {"label": "争议单数", "value": 0}]
+const stats = computed(() => [
+  { label: "待核对结算单", value: statusCount(statuses[0]) },
+  { label: "本月结算额", value: 0 },
+  { label: "争议单数", value: statusCount(statuses[4]) },
+])
+
+function statusCount(status: string) {
+  // 与列表同一批条目：概览/下钻按 pending 统计，这里按模块自己的状态口径统计
+  return rows.value.filter((row) => String(row.status ?? '') === status).length
+}
 
 const rows = ref<Row[]>([])
 const total = ref(0)

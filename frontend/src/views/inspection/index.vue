@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { request } from '@/api/client'
 
@@ -73,7 +73,16 @@ const ENDPOINT = '/api/inspection'
 const columns = ["巡检单号", "巡检类型", "巡检路线", "巡检人员", "开始时间", "发现问题数", "巡检周期", "巡检状态"]
 const actions = ["派发巡检", "提交巡检结果", "作废巡检"]
 const statuses = ["待派发", "巡检中", "已提交", "已作废"]
-const stats = [{"label": "待派发巡检", "value": 0}, {"label": "巡检中任务", "value": 0}, {"label": "本月发现问题", "value": 0}]
+const stats = computed(() => [
+  { label: "待派发巡检", value: statusCount(statuses[0]) },
+  { label: "巡检中任务", value: statusCount(statuses[1]) },
+  { label: "本月发现问题", value: 0 },
+])
+
+function statusCount(status: string) {
+  // 与列表同一批条目：概览/下钻按 pending 统计，这里按模块自己的状态口径统计
+  return rows.value.filter((row) => String(row.status ?? '') === status).length
+}
 
 const rows = ref<Row[]>([])
 const total = ref(0)

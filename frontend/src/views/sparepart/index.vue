@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { request } from '@/api/client'
 
@@ -73,7 +73,16 @@ const ENDPOINT = '/api/sparepart'
 const columns = ["领用单号", "备件名称", "备件规格", "领用数量", "领用人员", "领用日期", "所属班组", "领用状态"]
 const actions = ["批准领用", "确认发放", "退回备件"]
 const statuses = ["待审批", "已批准", "已领用", "已退回"]
-const stats = [{"label": "待审批领用", "value": 0}, {"label": "本月领用单", "value": 0}, {"label": "退回单数", "value": 0}]
+const stats = computed(() => [
+  { label: "待审批领用", value: statusCount(statuses[0]) },
+  { label: "本月领用单", value: 0 },
+  { label: "退回单数", value: statusCount(statuses[3]) },
+])
+
+function statusCount(status: string) {
+  // 与列表同一批条目：概览/下钻按 pending 统计，这里按模块自己的状态口径统计
+  return rows.value.filter((row) => String(row.status ?? '') === status).length
+}
 
 const rows = ref<Row[]>([])
 const total = ref(0)

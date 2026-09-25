@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { request } from '@/api/client'
 
@@ -73,7 +73,16 @@ const ENDPOINT = '/api/contractor'
 const columns = ["承包商编码", "承包商名称", "资质等级", "服务范围", "联系人", "联系电话", "合同到期日", "合作状态"]
 const actions = ["审核承包商", "暂停合作", "终止合作"]
 const statuses = ["待审核", "合作中", "已暂停", "已终止"]
-const stats = [{"label": "合作承包商", "value": 0}, {"label": "待审核承包商", "value": 0}, {"label": "即将到期合同", "value": 0}]
+const stats = computed(() => [
+  { label: "合作承包商", value: statusCount(statuses[1]) },
+  { label: "待审核承包商", value: statusCount(statuses[0]) },
+  { label: "即将到期合同", value: 0 },
+])
+
+function statusCount(status: string) {
+  // 与列表同一批条目：概览/下钻按 pending 统计，这里按模块自己的状态口径统计
+  return rows.value.filter((row) => String(row.status ?? '') === status).length
+}
 
 const rows = ref<Row[]>([])
 const total = ref(0)

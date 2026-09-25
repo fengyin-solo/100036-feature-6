@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { request } from '@/api/client'
 
@@ -73,7 +73,16 @@ const ENDPOINT = '/api/station'
 const columns = ["电站编码", "电站名称", "装机容量", "并网电压等级", "所属区域", "投运日期", "运维班组", "电站状态"]
 const actions = ["办理并网", "申请限电", "停运电站"]
 const statuses = ["在建", "已投运", "限电中", "已停运"]
-const stats = [{"label": "在运电站", "value": 0}, {"label": "限电电站", "value": 0}, {"label": "本月新增并网", "value": 0}]
+const stats = computed(() => [
+  { label: "在运电站", value: statusCount(statuses[1]) },
+  { label: "限电电站", value: statusCount(statuses[2]) },
+  { label: "本月新增并网", value: 0 },
+])
+
+function statusCount(status: string) {
+  // 与列表同一批条目：概览/下钻按 pending 统计，这里按模块自己的状态口径统计
+  return rows.value.filter((row) => String(row.status ?? '') === status).length
+}
 
 const rows = ref<Row[]>([])
 const total = ref(0)

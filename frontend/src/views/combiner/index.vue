@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { request } from '@/api/client'
 
@@ -73,7 +73,16 @@ const ENDPOINT = '/api/combiner'
 const columns = ["汇流箱编号", "接入组串数", "直流电压", "输出电流", "防雷模块状态", "所属方阵", "安装位置", "运行状态"]
 const actions = ["确认正常", "登记支路异常", "更换设备"]
 const statuses = ["待巡检", "正常", "支路异常", "已更换"]
-const stats = [{"label": "正常汇流箱", "value": 0}, {"label": "支路异常", "value": 0}, {"label": "待巡检汇流箱", "value": 0}]
+const stats = computed(() => [
+  { label: "正常汇流箱", value: statusCount(statuses[1]) },
+  { label: "支路异常", value: statusCount(statuses[2]) },
+  { label: "待巡检汇流箱", value: 0 },
+])
+
+function statusCount(status: string) {
+  // 与列表同一批条目：概览/下钻按 pending 统计，这里按模块自己的状态口径统计
+  return rows.value.filter((row) => String(row.status ?? '') === status).length
+}
 
 const rows = ref<Row[]>([])
 const total = ref(0)

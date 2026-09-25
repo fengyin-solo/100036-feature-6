@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { request } from '@/api/client'
 
@@ -73,7 +73,16 @@ const ENDPOINT = '/api/repair'
 const columns = ["消缺单号", "关联缺陷", "处理措施", "备件消耗", "处理人员", "完成时间", "验收人员", "处理状态"]
 const actions = ["受理消缺", "提交验收", "确认验收"]
 const statuses = ["待受理", "处理中", "待验收", "已验收"]
-const stats = [{"label": "待受理消缺", "value": 0}, {"label": "处理中消缺", "value": 0}, {"label": "本月验收单数", "value": 0}]
+const stats = computed(() => [
+  { label: "待受理消缺", value: statusCount(statuses[0]) },
+  { label: "处理中消缺", value: statusCount(statuses[1]) },
+  { label: "本月验收单数", value: 0 },
+])
+
+function statusCount(status: string) {
+  // 与列表同一批条目：概览/下钻按 pending 统计，这里按模块自己的状态口径统计
+  return rows.value.filter((row) => String(row.status ?? '') === status).length
+}
 
 const rows = ref<Row[]>([])
 const total = ref(0)

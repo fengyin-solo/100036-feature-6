@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { request } from '@/api/client'
 
@@ -73,7 +73,16 @@ const ENDPOINT = '/api/irradiance'
 const columns = ["测点编号", "测点位置", "总辐照度", "直射辐照度", "组件温度", "环境温度", "采集时间", "测点状态"]
 const actions = ["确认采集", "登记缺测", "提交校准"]
 const statuses = ["正常采集", "数据缺测", "传感器故障", "已校准"]
-const stats = [{"label": "在测测点", "value": 0}, {"label": "缺测测点", "value": 0}, {"label": "日均辐照度", "value": 0}]
+const stats = computed(() => [
+  { label: "在测测点", value: statusCount(statuses[0]) },
+  { label: "缺测测点", value: statusCount(statuses[1]) },
+  { label: "日均辐照度", value: 0 },
+])
+
+function statusCount(status: string) {
+  // 与列表同一批条目：概览/下钻按 pending 统计，这里按模块自己的状态口径统计
+  return rows.value.filter((row) => String(row.status ?? '') === status).length
+}
 
 const rows = ref<Row[]>([])
 const total = ref(0)

@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { request } from '@/api/client'
 
@@ -73,7 +73,16 @@ const ENDPOINT = '/api/stringmon'
 const columns = ["组串编号", "所属方阵", "实测电流", "实测电压", "功率偏差率", "采集时间", "告警等级", "监测状态"]
 const actions = ["确认正常", "标记异常", "安排复测"]
 const statuses = ["正常", "电流偏低", "电流为零", "已复测"]
-const stats = [{"label": "在监组串", "value": 0}, {"label": "电流异常组串", "value": 0}, {"label": "偏差超限组串", "value": 0}]
+const stats = computed(() => [
+  { label: "在监组串", value: statusCount(statuses[0]) },
+  { label: "电流异常组串", value: [statuses[1], statuses[2]].reduce((sum, s) => sum + statusCount(s), 0) },
+  { label: "偏差超限组串", value: 0 },
+])
+
+function statusCount(status: string) {
+  // 与列表同一批条目：概览/下钻按 pending 统计，这里按模块自己的状态口径统计
+  return rows.value.filter((row) => String(row.status ?? '') === status).length
+}
 
 const rows = ref<Row[]>([])
 const total = ref(0)
